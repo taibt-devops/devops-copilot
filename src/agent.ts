@@ -9,6 +9,7 @@ import { hostServer } from "./hostcmd.js";
 import { jenkinsServer, hasJenkinsFinder } from "./jenkins.js";
 import { historyServer } from "./history.js";
 import { memoryServer } from "./memory.js";
+import { createSearchKnowledgeServer, createRagDeps } from "./rag/search.js";
 
 /**
  * The core agent loop. `ask()` runs one question through the Claude Agent SDK
@@ -16,8 +17,18 @@ import { memoryServer } from "./memory.js";
  * CLAUDE_CODE_OAUTH_TOKEN (or ANTHROPIC_API_KEY) from the environment.
  */
 
+// RAG (search_knowledge) — opt-in. Built lazily so a misconfig never crashes boot.
+const ragDeps = CONFIG.rag.enabled
+  ? createRagDeps({
+      embedModelId: CONFIG.rag.embedModelId,
+      region: CONFIG.rag.store.region,
+      defaultK: CONFIG.rag.defaultK,
+      store: { ...CONFIG.rag.store, backend: CONFIG.rag.store.backend as never },
+    })
+  : undefined;
+
 // Hub/AWS servers + in-process servers: skills (fetch_skill), results (query_result),
-// history (search_history), memory (save_memory).
+// history (search_history), memory (save_memory), knowledge (search_knowledge, opt-in).
 const mcpServers = {
   ...loadMcpServers(),
   skills: skillsServer,
@@ -27,6 +38,7 @@ const mcpServers = {
   // Recursive Jenkins folder search (the hub jenkins tools are top-level only).
   ...(hasJenkinsFinder ? { "jenkins-find": jenkinsServer } : {}),
   ...(CONFIG.hostInspectEnabled ? { host: hostServer } : {}),
+  ...(ragDeps ? { knowledge: createSearchKnowledgeServer(ragDeps, CONFIG.rag.defaultK) } : {}),
 };
 
 export type SSEEvent =

@@ -168,5 +168,9 @@ export function buildSystemPrompt(): string {
     : "";
 
   const memory = memoryPromptSection();
-  return (docs ? `${PERSONA}\n\n--- KNOWLEDGE BASE ---${docs}` : PERSONA) + memory + code;
+  // Only advertise search_knowledge when RAG is actually enabled (the tool won't exist otherwise).
+  const rag = CONFIG.rag.enabled
+    ? `\n\n--- SEMANTIC KNOWLEDGE (search_knowledge) ---\nFor "how do we…" questions, historical incidents, or deep service internals NOT covered by the always-on knowledge above or a named skill, call the \`search_knowledge\` tool to retrieve relevant doc chunks by meaning. Treat results as leads: CITE the returned source path and verify time-sensitive facts with live tools. If it reports the index is unavailable, just proceed with the knowledge base, skills, and live tools.`
+    : "";
+  return (docs ? `${PERSONA}\n\n--- KNOWLEDGE BASE ---${docs}` : PERSONA) + memory + code + rag;
 }

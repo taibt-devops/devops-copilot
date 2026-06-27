@@ -46,9 +46,11 @@ construction** so it never adds risk to production.
 - **Learned memory** + **Q&A history** — durable facts and past investigations, recalled via tools.
 - **Output spill-to-disk** — oversized tool results are spilled to a file; the agent pulls only the
   slice it needs via a read-only `query_result` tool.
-- **RAG (roadmap, opt-in)** — semantic retrieval over a large doc corpus: Cohere embeddings/rerank
-  on AWS Bedrock with a pluggable vector store (local file → **Amazon S3 Vectors** → OpenSearch
-  k-NN), toggled by a deploy flag and degrading soft when off. See [`docs/RAG_PLAN.md`](docs/RAG_PLAN.md).
+- **RAG (`src/rag/`, opt-in, off by default)** — semantic retrieval over a large doc corpus: Cohere
+  embeddings on AWS Bedrock with a pluggable vector store (local file → **Amazon S3 Vectors** →
+  OpenSearch k-NN), exposed as a read-only `search_knowledge` tool. Toggled by `COPILOT_RAG_ENABLED`
+  and **fail-soft** (falls back to knowledge/skills/live tools if the index is unavailable). Build the
+  index with `npm run ingest ./knowledge`. See [`docs/RAG_PLAN.md`](docs/RAG_PLAN.md).
 
 ## Repo layout
 
@@ -67,7 +69,10 @@ devops-copilot/
 │   ├── hostcmd.ts     # inspect_host — allowlisted read-only SSM command
 │   ├── jenkins.ts     # recursive Jenkins folder search
 │   ├── secrets.ts     # hydrate tokens from AWS Secrets Manager at boot
-│   └── config.ts      # 12-factor config from env
+│   ├── config.ts      # 12-factor config from env
+│   └── rag/           # opt-in RAG: chunk, embed, store (local/S3-file/S3-Vectors), search_knowledge
+├── scripts/ingest.ts  # build/refresh the RAG vector index (offline / cron)
+├── test/              # node:test unit tests (chunker, store, embed, retrieve, …)
 ├── knowledge/         # always-on context (example files; bring your own)
 ├── skills/            # on-demand runbooks (example file; bring your own)
 ├── web/index.html     # mobile-first streaming UI

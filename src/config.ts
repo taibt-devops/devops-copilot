@@ -40,6 +40,32 @@ export const CONFIG = {
    *    restart/rm/delete/format/stop/disable/install/writes/...). NOT strictly read-only.
    */
   hostMode: (process.env.COPILOT_HOST_MODE ?? "allowlist").toLowerCase(),
+
+  /**
+   * RAG (semantic knowledge retrieval) — OPT-IN. Off by default: the app runs fully on
+   * knowledge/ + skills/ with zero extra infra. When on, the `search_knowledge` tool is
+   * registered and degrades soft if the backend is unreachable. See docs/RAG_PLAN.md.
+   */
+  rag: {
+    enabled: (process.env.COPILOT_RAG_ENABLED ?? "false") === "true",
+    embedModelId: process.env.COPILOT_RAG_EMBED_MODEL ?? "cohere.embed-multilingual-v3",
+    defaultK: Number(process.env.COPILOT_RAG_K ?? 6),
+    /** Doc roots to index (used by scripts/ingest.ts). */
+    sources: (process.env.COPILOT_RAG_SOURCES ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
+    store: {
+      /** local | s3-file | s3-vectors | opensearch */
+      backend: process.env.COPILOT_RAG_STORE ?? "local",
+      localPath: process.env.COPILOT_RAG_LOCAL_PATH ?? "./data/rag-index.json",
+      bucket: process.env.COPILOT_RAG_BUCKET ?? "",
+      key: process.env.COPILOT_RAG_KEY ?? "rag/index.json",
+      vectorBucket: process.env.COPILOT_RAG_VECTOR_BUCKET ?? "",
+      indexName: process.env.COPILOT_RAG_INDEX ?? "devops-copilot",
+      region: process.env.AWS_REGION ?? "us-east-1",
+    },
+  },
 };
 
 /** The SDK auto-reads these; we only check that one is present. */
