@@ -77,7 +77,7 @@ devops-copilot/
 ├── skills/            # on-demand runbooks (example file; bring your own)
 ├── web/index.html     # mobile-first streaming UI
 ├── deploy/            # Dockerfile, k8s SA, MCP template, source-sync scripts
-└── docs/              # SPEC + RAG plan
+└── docs/              # ARCHITECTURE (diagrams) + SPEC + RAG plan
 ```
 
 ## Quickstart
@@ -101,7 +101,8 @@ npm run dev                   # http://localhost:8787
 
 Wire it to your own environment by editing `knowledge/` (topology, conventions), adding your
 runbooks to `skills/`, and pointing the MCP config at your Grafana/OpenSearch/Jenkins/etc.
-See [`deploy/README.md`](deploy/README.md) for the container deploy and [`docs/SPEC.md`](docs/SPEC.md)
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how the pieces fit (diagrams),
+[`deploy/README.md`](deploy/README.md) for the container deploy, and [`docs/SPEC.md`](docs/SPEC.md)
 for the full design.
 
 ## License
