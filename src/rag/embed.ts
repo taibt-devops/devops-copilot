@@ -23,20 +23,49 @@ export interface Embedder {
   embedQuery(text: string): Promise<number[]>;
 }
 
+export type EmbedProvider = "cohere" | "titan";
+
+/** Cohere/Titan have different request + response shapes; infer from the Bedrock model id. */
+export function inferProvider(modelId: string): EmbedProvider {
+  return /titan|amazon|nova/i.test(modelId) ? "titan" : "cohere";
+}
+
 /** Cohere on Bedrock returns either `embeddings: number[][]` or `embeddings: { float: number[][] }`. */
-function parseEmbeddings(json: string): number[][] {
+function parseCohere(json: string): number[][] {
   const o = JSON.parse(json) as { embeddings?: number[][] | { float?: number[][] } };
   const e = o.embeddings;
   if (Array.isArray(e)) return e;
   if (e && Array.isArray(e.float)) return e.float;
-  throw new Error("embed: unexpected Bedrock response shape (no embeddings)");
+  throw new Error("embed: unexpected Cohere response shape (no embeddings)");
 }
 
-export function createEmbedder(invoke: InvokeFn, modelId: string): Embedder {
+/** Amazon Titan embeds ONE text per call and returns `{ embedding: number[] }`. */
+function parseTitan(json: string): number[] {
+  const o = JSON.parse(json) as { embedding?: number[] };
+  if (!Array.isArray(o.embedding)) throw new Error("embed: unexpected Titan response (no embedding)");
+  return o.embedding;
+}
+
+export function createEmbedder(
+  invoke: InvokeFn,
+  modelId: string,
+  provider: EmbedProvider = inferProvider(modelId),
+): Embedder {
+  if (provider === "titan") {
+    const one = async (text: string) => parseTitan(await invoke(modelId, JSON.stringify({ inputText: text })));
+    return {
+      embed: async (texts) => {
+        const out: number[][] = [];
+        for (const t of texts) out.push(await one(t)); // Titan = one text per request
+        return out;
+      },
+      embedQuery: (text) => one(text),
+    };
+  }
+  // Cohere: batch all texts in one call, with input_type.
   const run = async (texts: string[], input_type: string): Promise<number[][]> => {
     if (texts.length === 0) return [];
-    const body = JSON.stringify({ texts, input_type });
-    return parseEmbeddings(await invoke(modelId, body));
+    return parseCohere(await invoke(modelId, JSON.stringify({ texts, input_type })));
   };
   return {
     embed: (texts) => run(texts, "search_document"),

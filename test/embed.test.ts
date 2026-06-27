@@ -21,6 +21,24 @@ test("parses the Cohere v4 embeddings.float response shape", async () => {
   assert.deepEqual(await e.embed(["x"]), [[7, 8]]);
 });
 
+test("titan provider embeds one text per call (inputText) and parses {embedding}", async () => {
+  const bodies: any[] = [];
+  const invoke: InvokeFn = async (_m, b) => {
+    bodies.push(JSON.parse(b));
+    return JSON.stringify({ embedding: [bodies.length] });
+  };
+  const e = createEmbedder(invoke, "amazon.titan-embed-text-v2:0", "titan");
+  const vecs = await e.embed(["a", "b"]);
+  assert.deepEqual(vecs, [[1], [2]]);
+  assert.deepEqual(bodies, [{ inputText: "a" }, { inputText: "b" }]);
+});
+
+test("provider is inferred from the model id when omitted (titan -> titan)", async () => {
+  const invoke: InvokeFn = async () => JSON.stringify({ embedding: [5] });
+  const e = createEmbedder(invoke, "amazon.titan-embed-text-v2:0");
+  assert.deepEqual(await e.embedQuery("q"), [5]);
+});
+
 test("embedQuery uses input_type search_query and returns a single vector", async () => {
   let body: any;
   const invoke: InvokeFn = async (_m, b) => {

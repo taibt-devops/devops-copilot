@@ -164,3 +164,8 @@ R1+R2 = a working RAG end-to-end (on `local`). R3 = quality. R4 = production on 
   (read-only store access).
 - S3 Vectors trades latency for cost — fine for infrequent incident queries; switch to OpenSearch
   if you ever need realtime/high-QPS retrieval.
+- **Embedding provider availability:** Cohere on Bedrock is sold via AWS Marketplace and can be
+  blocked in some countries ("this offer is not available to accept in this country"). The embedder
+  auto-detects the provider from the model id and also supports **Amazon Titan**
+  (`amazon.titan-embed-text-v2:0`, no Marketplace, available everywhere) — verified end-to-end
+  (chunk → embed → local store → cited retrieval) on the dev AWS account.
