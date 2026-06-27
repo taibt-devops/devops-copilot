@@ -1,0 +1,47 @@
+{
+  "_comment": "MCP config template for the DevOps Copilot deploy. NO secret values here — token/password fields are ${VAR} placeholders expanded at boot from process.env, which is hydrated from AWS Secrets Manager (see src/secrets.ts). Replace the example URLs/usernames below with your own. The aws-api server is app-local (src/mcp.ts EXTRA_SERVERS), not listed here.",
+  "mcpServers": {
+    "grafana": {
+      "command": "npx",
+      "args": ["-y", "@leval/mcp-grafana"],
+      "env": {
+        "GRAFANA_URL": "https://grafana.example.com",
+        "GRAFANA_SERVICE_ACCOUNT_TOKEN": "${GRAFANA_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
+    "opensearch": {
+      "command": "uvx",
+      "args": ["opensearch-mcp-server-py"],
+      "env": {
+        "OPENSEARCH_URL": "https://opensearch.example.com:9200",
+        "OPENSEARCH_USERNAME": "opensearch-reader",
+        "OPENSEARCH_PASSWORD": "${OPENSEARCH_PASSWORD}",
+        "OPENSEARCH_SSL_VERIFY": "false"
+      }
+    },
+    "jenkins": {
+      "command": "npx",
+      "args": ["-y", "@kud/mcp-jenkins@latest"],
+      "env": {
+        "MCP_JENKINS_URL": "https://jenkins.example.com",
+        "MCP_JENKINS_USER": "jenkins-bot",
+        "MCP_JENKINS_API_TOKEN": "${MCP_JENKINS_API_TOKEN}"
+      }
+    },
+    "kubernetes": {
+      "command": "npx",
+      "args": ["-y", "kubernetes-mcp-server", "--disable-destructive"],
+      "env": {
+        "AWS_REGION": "${AWS_REGION}"
+      }
+    },
+    "backlog": {
+      "command": "npx",
+      "args": ["-y", "backlog-mcp-server"],
+      "env": {
+        "BACKLOG_DOMAIN": "your-space.backlog.com",
+        "BACKLOG_API_KEY": "${BACKLOG_API_KEY}"
+      }
+    }
+  }
+}

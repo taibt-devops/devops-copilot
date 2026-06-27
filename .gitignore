@@ -1,0 +1,37 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build output
+dist/
+build/
+*.tsbuildinfo
+
+# staged curated docs for the image (derived by deploy/gather-docs.mjs; source of
+# truth is each repo's local-only DOMAIN.md/CLAUDE.md/DECISIONS.md). Don't commit copies.
+deploy/code-docs/
+
+# persisted Q&A history + learned memory (runtime state on a volume)
+data/
+
+# secrets / env — NEVER commit
+.env
+.env.*
+!.env.example
+*.token
+*oauth*token*
+credentials
+.claude/
+
+# logs
+*.log
+logs/
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
