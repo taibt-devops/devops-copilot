@@ -9,6 +9,8 @@ code, not by prompt.
 This document is the map of how the pieces fit. For the *why* and the product spec see
 [`SPEC.md`](SPEC.md); for the retrieval layer see [`RAG_PLAN.md`](RAG_PLAN.md).
 
+![DevOps Copilot architecture](architecture.png)
+
 ---
 
 ## 1. Request flow (end to end)

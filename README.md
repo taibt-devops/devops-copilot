@@ -3,6 +3,8 @@
 **Ask your infrastructure what's wrong — in plain language, from your phone — and get a
 cited answer instead of five open dashboards.**
 
+![DevOps Copilot architecture](docs/architecture.png)
+
 DevOps Copilot is an open, **read-only** AI assistant that investigates production incidents
 for you. You ask a normal question; it autonomously queries your existing observability, CI,
 and cloud stack through **MCP**, correlates the evidence, and replies with the probable cause,
