@@ -1,25 +1,48 @@
 # DevOps Copilot
 
-A single-user, **read-only** AI assistant for incident response over your own infrastructure.
-Ask it operational questions in natural language ("why is `auth-service` returning 401?") from
-your phone during an incident; it investigates by querying your existing observability + CI +
-cloud stack through **MCP** and answers with **cited sources** and a **calibrated confidence level**.
+**Ask your infrastructure what's wrong — in plain language, from your phone — and get a
+cited answer instead of five open dashboards.**
+
+DevOps Copilot is an open, **read-only** AI assistant that investigates production incidents
+for you. You ask a normal question; it autonomously queries your existing observability, CI,
+and cloud stack through **MCP**, correlates the evidence, and replies with the probable cause,
+the **sources it used**, and a **confidence level** — without ever touching production.
+
+```
+You:  Why is checkout-api returning 401 in prod since ~10:40?
+      ↓
+Copilot:  [OBS] checkout-api started returning 401 at 10:41, right after deploy #482.
+          The deploy rotated the auth service account but the API still holds the old
+          JWT audience. Evidence: OpenSearch `checkout-*` logs (401 "aud mismatch"),
+          Jenkins job #482 (10:39), k8s rollout at 10:40.
+          Fix (for you to run — I can't): redeploy checkout-api to pick up the new aud,
+          or roll back #482.
+```
+
+## The problem it solves
+
+When something breaks at 2am, diagnosis is slow and lonely:
+
+- You're **alt-tabbing across five tools** — logs, traces, dashboards, CI, tickets — trying to
+  line up *what changed* with *what broke*.
+- The know-how to do that fast lives in **one senior engineer's head** (and their laptop). When
+  they're asleep or on leave, MTTR balloons.
+- Most "AI for ops" tools are scary because they can **act** on prod. You don't want an LLM
+  restarting things at 2am.
+
+DevOps Copilot turns that tribal, single-machine capability into an **always-on service you can
+reach from a phone**, and makes it safe to trust by being **read-only by construction** — it can
+read and reason across everything, but it is *physically incapable* of changing your
+infrastructure (enforced in code across three layers, not by a prompt). It accelerates the
+slowest part of an incident — *diagnosis* — and leaves the *fix* to a human.
 
 Built on the **[Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-typescript)**
-(the same engine as Claude Code), it reuses your existing MCP servers (Grafana, OpenSearch,
-Jenkins, Kubernetes, AWS, …) but with **every mutating tool blocked in code** — it can read and
-diagnose, never change anything.
+(the same engine as Claude Code), it **reuses the MCP servers you already run** (Grafana,
+OpenSearch, Jenkins, Kubernetes, AWS, …) — no new agents to install on your boxes.
 
-> This is a reference implementation / portfolio project. All example hostnames, accounts,
-> service names and runbooks are placeholders — wire it to your own stack via env + `knowledge/`.
-
-## Why
-
-A lot of incident-investigation capability tends to live inside one engineer's IDE on one
-machine: the MCP tooling, the accumulated runbooks, the muscle memory of correlating logs ↔
-traces ↔ deploys ↔ tickets. This turns that into an always-on service reachable from a phone,
-so diagnosis isn't gated on one person being at one desk — while staying **read-only by
-construction** so it never adds risk to production.
+> **Use it / fork it.** This is an open reference implementation: clone it, point it at your own
+> stack via env + the `knowledge/` folder, and you have an incident copilot for *your* infra. All
+> example hostnames, services, and runbooks in the repo are placeholders.
 
 ## Key properties
 
