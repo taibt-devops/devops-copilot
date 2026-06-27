@@ -46,8 +46,9 @@ construction** so it never adds risk to production.
 - **Learned memory** + **Q&A history** — durable facts and past investigations, recalled via tools.
 - **Output spill-to-disk** — oversized tool results are spilled to a file; the agent pulls only the
   slice it needs via a read-only `query_result` tool.
-- **RAG (roadmap)** — semantic retrieval over a large doc corpus (Cohere embeddings/rerank on AWS
-  Bedrock → in-process k-NN → OpenSearch k-NN). See [`docs/RAG_PLAN.md`](docs/RAG_PLAN.md).
+- **RAG (roadmap, opt-in)** — semantic retrieval over a large doc corpus: Cohere embeddings/rerank
+  on AWS Bedrock with a pluggable vector store (local file → **Amazon S3 Vectors** → OpenSearch
+  k-NN), toggled by a deploy flag and degrading soft when off. See [`docs/RAG_PLAN.md`](docs/RAG_PLAN.md).
 
 ## Repo layout
 
